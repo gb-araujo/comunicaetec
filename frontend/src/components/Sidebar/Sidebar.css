@@ -1,0 +1,58 @@
+.Sidebar {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Roboto', sans-serif;
+    border-bottom-right-radius: 15px;
+    width: 19%;
+    height: 100%;
+    box-shadow: 1px 1px 5px rgba(85, 85, 85, 0.5);
+    background: #fff;
+}
+
+.Sidebar a{
+    color: black;
+    text-decoration: none;
+}
+
+.perfilButton{
+    padding: 20px;
+    display: flex;
+    align-items: start;
+}
+
+.perfilButton ul{
+    margin: 0;
+    padding-left: 10px;
+    list-style: none;
+    overflow: hidden;
+    width: 100%;
+}
+
+.perfilButton ul li{
+    white-space: nowrap;
+}
+
+.Listas{
+    width: 100%;
+}
+
+.Listas ul{
+    font-size: 15pt;
+    list-style: none;
+    overflow: hidden;
+    font-weight: 500;
+    margin: 0;
+    padding-left: 40px;
+}
+
+.Listas li {
+    display: flex;
+    align-items: center;
+}
+
+.Listas img{
+    padding: 5px;
+    width: 20px;
+    height: 20px;
+}
+

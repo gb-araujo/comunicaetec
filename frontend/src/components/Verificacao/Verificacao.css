@@ -1,0 +1,77 @@
+.ContainerVerificacao {
+    background-image: url('../../assets/fundo.jpg');
+    background-size: cover;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Move o elemento para trás, abaixo de outros elementos */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.ContainerVerificacao h1{
+    color: #fff;
+    background: #23232e;
+    
+}
+
+.BoxVerificacao{
+    display: flex;
+    border-radius: 25px;
+    padding: 5vh;
+    background: #F4F4F5;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 1px 1px 5px 2px rgba(85, 85, 85, 0.5);
+}
+
+.BoxVerificacao img{
+    width: 15vw;
+}
+
+.BoxVerificacao p {
+    font-size: larger;
+    font-family: Roboto, sans-serif;
+}
+
+.BoxVerificacao button{
+    background-color: #656ed3;
+    color: #fff;
+    width: 80%;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 12pt;
+    font-weight: 600;
+}
+
+.retorno{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #656ed3;
+    color: #fff;
+    width: 80%;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 12pt;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.retorno button{
+    margin: auto;
+}
+
+
+.BoxVerificacao button:hover{
+    background: #7d85d9;
+}
+
+
+

@@ -1,0 +1,28 @@
+.privacy-page {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .privacy-page h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .privacy-page h2 {
+    font-size: 20px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .privacy-page p {
+    margin-bottom: 15px;
+  }
+  
+  .privacy-page a {
+    color: #007bff;
+  }
+  
+  .privacy-page a:hover {
+    text-decoration: underline;
+  }
+  

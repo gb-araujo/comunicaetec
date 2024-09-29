@@ -1,0 +1,17 @@
+.buttonDownload {
+    background-color: #5892FF;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 20px;
+    cursor: pointer;
+    width: 15%;
+  }
+  
+.download {
+    margin: auto;
+    background-color: rgba(230, 230, 230, 0.727);
+    width: 50%;
+    margin-top: 10%;
+}

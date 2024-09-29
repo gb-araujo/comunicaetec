@@ -1,0 +1,296 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+@import url("https://fonts.googleapis.com/css?family=Poppins:500,700|Roboto:900");
+
+:root {
+  --amethyst-smoke: #9197b5;
+  --black: #000000;
+  --border: #eaeaea;
+  --primary: #1682fd;
+  --font-size-l: 4vw; /* Changed from 96px */
+  --font-size-m: 2vw; /* Changed from 24px */
+  --font-size-s: 2vw; /* Changed from 16px */
+  --font-size-xs: 1.5vw; /* Changed from 12px */
+  --font-family-poppins: "Poppins", Helvetica;
+  --font-family-roboto: "Roboto", Helvetica;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+}
+
+.home-page {
+  background-color: #ffffff;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100vw;
+}
+
+.home-page .comunica-etec-xVxyAW {
+  color: #00000033;
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-l);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  position: absolute;
+  text-align: left;
+  top: 22.7%;
+  left: 5%;
+}
+
+.home-page .illustrations-xVxyAW {
+  height: 57.7%;
+  position: absolute;
+  top: 21.1%;
+  left: 51.8%;
+  width: 35.9%;
+}
+
+.home-page .conectando-mentes-e-xVxyAW {
+  color: transparent;
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-m);
+  font-weight: 400;
+  position: absolute;
+  text-align: left;
+  top: 49.9%;
+  left: 5%;
+  width: 25.7%;
+}
+
+.home-page .span0-dr1Phx {
+  color: #656ed3;
+  font-weight: 700;
+}
+
+.home-page .span1-dr1Phx {
+  color: #76768f;
+  font-weight: 500;
+}
+
+.home-page .group-10155-xVxyAW {
+  position: absolute;
+  top: 87.8%;
+  left: 5%;
+  width: 34.6%;
+}
+
+.home-page .lorem-ipsum-dolor-si-XleDEj {
+  color: #76768f;
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-s);
+  font-weight: 500;
+  position: absolute;
+  text-align: left;
+  top: 12.5%;
+  left: 11.3%;
+}
+
+.home-page .group-10152-XleDEj {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7.2%;
+}
+
+.home-page .group-10148-4zGLmV {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7.2%;
+}
+
+.home-page .vector-Pyfpzc {
+  position: absolute;
+  top: 25%;
+  left: 37.5%;
+  width: 21.9%;
+}
+
+.home-page .ellipse-148-Pyfpzc {
+  border: 1px solid var(--amethyst-smoke);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.home-page .group-10149-4zGLmV {
+  position: absolute;
+  top: 0;
+  left: 38.1%;
+  width: 7.2%;
+}
+
+.home-page .vector-Lu2Jdt {
+  position: absolute;
+  top: 31.3%;
+  left: 25%;
+  width: 50%;
+}
+
+.home-page .ellipse-149-Lu2Jdt {
+  border: 1px solid var(--amethyst-smoke);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.home-page .group-10150-4zGLmV {
+  position: absolute;
+  top: 0;
+  left: 77.2%;
+  width: 7.2%;
+}
+
+.home-page .vector-ME7YI8 {
+  position: absolute;
+  top: 28.1%;
+  left: 28.1%;
+  width: 43.8%;
+}
+
+.home-page .ellipse-150-ME7YI8 {
+  border: 1px solid var(--amethyst-smoke);
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.home-page .group-7-xVxyAW {
+  position: absolute;
+  top: 4.6%;
+  left: 83.8%;
+  width: 11%;
+}
+
+.home-page .button-keCC4o {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.home-page .button-KmQvTk {
+  background-color: var(--primary);
+  border-radius: 8px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 49.1%;
+}
+
+.home-page .login-Uz5qKR {
+  color: #ffffff;
+  font-family: var(--font-family-poppins);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  position: absolute;
+  text-align: center;
+  top: 28.9%;
+  left: 17.5%;
+  width: 14.2%;
+}
+
+/* Additional responsive styles */
+@media screen and (max-width: 1024px) {
+  .home-page .illustrations-xVxyAW {
+    left: 50%;
+    width: 40%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --font-size-l: 12vw;
+    --font-size-m: 6vw;
+    --font-size-s: 4vw;
+    --font-size-xs: 3vw;
+  }
+
+  .home-page .comunica-etec-xVxyAW {
+    font-size: var(--font-size-l);
+    top: 20%;
+    left: 5%;
+  }
+
+  .home-page .illustrations-xVxyAW {
+    top: 30%;
+    left: 5%;
+    width: 90%;
+    height: auto;
+  }
+
+  .home-page .conectando-mentes-e-xVxyAW {
+    font-size: var(--font-size-m);
+    top: 55%;
+    left: 5%;
+    width: 90%;
+  }
+
+  .home-page .group-10155-xVxyAW {
+    top: 90%;
+    left: 5%;
+    width: 90%;
+  }
+
+  .home-page .group-7-xVxyAW {
+    top: 5%;
+    left: 5%;
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .home-page .comunica-etec-xVxyAW {
+    font-size: var(--font-size-l);
+    top: 15%;
+  }
+
+  .home-page .illustrations-xVxyAW {
+    top: 20%;
+  }
+
+  .home-page .conectando-mentes-e-xVxyAW {
+    font-size: var(--font-size-m);
+    top: 65%;
+  }
+
+  .home-page .group-10155-xVxyAW {
+    top: 95%;
+  }
+
+  .home-page .group-7-xVxyAW {
+    top: 5%;
+    width: 80%;
+  }
+
+  .home-page .login-Uz5qKR {
+    font-size: var(--font-size-xs);
+    top: 30%;
+    left: 10%;
+    width: 80%;
+  }
+}
+
+@media screen and (max-width: 780px) {
+  .home-page .conectando-mentes-e-xVxyAW {
+    top: 65%; /* Ajuste a posição vertical conforme necessário */
+    width: 80%; /* Ajuste a largura do texto */
+    margin-top: 20px; /* Adicione uma margem superior para separar o texto da imagem */
+  }
+
+  .home-page .illustrations-xVxyAW {
+    width: 70%; /* Reduza um pouco a largura da imagem */
+    top: 25%; /* Ajuste a posição vertical conforme necessário */
+  }
+}

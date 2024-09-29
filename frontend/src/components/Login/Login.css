@@ -1,0 +1,58 @@
+.Background {
+    background-image: url('../../assets/background.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding-top: 30px;
+    width: 100%;
+    height: calc(100vh - 100px);
+    display: flex;
+    justify-content: center;
+}
+
+.LoginButton{
+    transition: .2s;
+    background-color: #656ed3;
+    color: #fff;
+    width: 80%;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 12pt;
+    font-weight: 600;
+}
+
+
+.LoginGoogle img{
+    display: flex;
+    height: 15px;
+    margin-right: 15px;
+}
+
+.LoginGoogle:hover{
+    background: lightgray;
+    border: 1px solid lightgray;
+}
+
+.LoginButton:hover{
+    background: rgb(37, 113, 199);
+}
+
+.formLogin {
+    font-family: Roboto, sans-serif;
+    font-size: large;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.logo {
+    display: flex;
+    height: 14vh;
+    width: 15vh;
+}
