@@ -1,9 +1,8 @@
 import './Registro.css'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Navbar from '../Navbar/Navbar'
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
-import { ref, set } from "firebase/database"
-import {auth, Realtimedb} from '../Firebase'
+import { registrar, mensagemDeErro } from '../../services/authService'
 import { Button, TextField, Box, Paper } from "@mui/material"
 import { styled } from "@mui/material/styles"
 
@@ -39,29 +38,18 @@ function Registro() {
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const [erro, setErro] = useState('')
+    const navigate = useNavigate()
 
     async function handleSubmit(e) {
         e.preventDefault()
+        setErro('')
 
         try {
-            await createUserWithEmailAndPassword(auth, email, senha).then(async (userCredential) => {
-                const user = userCredential.user
-
-                await updateProfile(user, {
-                    displayName: nome.trim() + " " + sobrenome.trim(),
-                })
-
-                await set(ref(Realtimedb, `users/${user.uid}`), {
-                    displayName: user.displayName,
-                    email: user.email,
-                })
-
-                window.location.href = "/usuario"
-            })
+            await registrar({ nome, sobrenome, email, senha })
+            // Conta nova ainda não tem o email verificado
+            navigate('/verificacao')
         } catch (error) {
-            // Tratar erros durante o registro
-            console.error("Erro durante o registro:", error)
-            setErro("Ocorreu um erro durante o registro. Por favor, tente novamente.")
+            setErro(mensagemDeErro(error))
         }
     }
 

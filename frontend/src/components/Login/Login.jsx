@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import { signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { ref, update } from "firebase/database"
-import { auth, Realtimedb } from '../Firebase'
+import { useNavigate } from 'react-router-dom'
+import { loginComEmail, loginComGoogle, mensagemDeErro } from '../../services/authService'
 import Navbar from '../Navbar/Navbar'
 import LogoGoogle from '../../assets/google.png'
 import Logo from '../../assets/logo.png'
@@ -40,41 +38,26 @@ function Login() {
     const [email, setEmail] = useState('')
     const [senha, setSenha] = useState('')
     const [erro, setErro] = useState('')
+    const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        setErro('')
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, senha)
-            console.log(userCredential.user)
-            if (!userCredential.user.emailVerified) {
-                window.location.href = '/verificacao'
-            } else {
-                window.location.href = '/usuario'
-            }
+            const user = await loginComEmail(email, senha)
+            navigate(user.emailVerified ? '/usuario' : '/verificacao')
         } catch (error) {
-            const err = JSON.stringify(error)
-            console.log(JSON.parse(err).code)
-            if (JSON.parse(err).code === "auth/invalid-credential" || JSON.parse(err).code === "auth/invalid-email") {
-                setErro("informações incorretas")
-            }
+            setErro(mensagemDeErro(error))
         }
     }
 
     const handleLoginGoogle = async () => {
+        setErro('')
         try {
-            const provider = new GoogleAuthProvider()
-            await signInWithPopup(auth, provider).then(async (userCredential) => {
-                const user = userCredential.user
-
-                await update(ref(Realtimedb, `users/${user.uid}`), {
-                    displayName: user.displayName,
-                    email: user.email,
-                })
-
-                window.location.href = "/usuario"
-            })
+            await loginComGoogle()
+            navigate('/usuario')
         } catch (error) {
-            console.log(error)
+            setErro(mensagemDeErro(error))
         }
     }
 
