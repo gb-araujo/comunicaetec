@@ -1,0 +1,38 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "users": {
+      ".indexOn": ["email"],
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('adm').exists())"
+      }
+    },
+
+    "posts": {
+      ".read": "auth != null",
+      ".indexOn": ["schoolID", "replyFor"],
+      "$postId": {
+        ".write": "auth != null"
+      }
+    },
+
+    "avisos": {
+      "$schoolId": {
+        ".read": "auth != null",
+        ".write": "auth != null && root.child('users').child(auth.uid).child('adm').val() === $schoolId",
+        ".indexOn": ["createdAt"]
+      }
+    },
+
+    "solicitacoes": {
+      ".read": "auth != null",
+      ".indexOn": ["schoolID"],
+      "$solicitacaoId": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}

@@ -5,9 +5,9 @@ import { styled } from "@mui/material/styles"
 import AddIcon from '@mui/icons-material/Add'
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
-import { Realtimedb, Firestoredb, storage } from "../../Firebase"
-import { ref as dbRef, onValue, push } from 'firebase/database'
-import { collection, query, getDocs, where, doc, getDoc } from "firebase/firestore"
+import { Realtimedb, Firestoredb, storage } from "../../../services/firebase"
+import { ref as dbRef, push } from 'firebase/database'
+import { doc, getDoc } from "firebase/firestore"
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const PostImage = styled('img')({
@@ -30,7 +30,7 @@ export default function ForumForm({ ProfilePic, User, Adm, arrayCursos, arrayEsc
             setFilterArray(admCourse)
             setSelectEscola(Adm)
         }
-    }, [])
+    }, [Adm, admCourse])
 
     const handleImageChange = (event) => {
         if (event.target.files && event.target.files[0]) {

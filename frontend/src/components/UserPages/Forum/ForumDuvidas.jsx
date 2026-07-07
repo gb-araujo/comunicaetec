@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Paper, Dialog, DialogTitle, DialogContentText, DialogActions, Avatar, Box, Typography, IconButton } from "@mui/material"
-import { FormControl, InputLabel, Select, MenuItem, Fab, Button, TextField } from "@mui/material"
+import { Paper, Dialog, Avatar, Box, Typography, IconButton } from "@mui/material"
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import CloseIcon from '@mui/icons-material/Close'
 import ModeCommentOutlinedIcon from '@mui/icons-material/ModeCommentOutlined'
 import VerifiedIcon from '@mui/icons-material/Verified'
-import { Realtimedb, Firestoredb } from "../../Firebase"
+import { Realtimedb, Firestoredb } from "../../../services/firebase"
 import { ref as dbRef, onValue, query as queryRdb, orderByChild, equalTo, remove } from 'firebase/database'
 import { collection, query, getDocs, where, doc, getDoc } from "firebase/firestore"
 import ForumForm from './ForumForm'
@@ -38,6 +38,9 @@ export default function ForumDuvidas({ ProfilePic, User, Adm }) {
         } else {
             GetUser()
         }
+        // GetAdm/GetUser/OnSearch são estáveis neste componente; o efeito é
+        // intencionalmente disparado apenas pelos filtros de busca.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filterSchool, filterTags])
 
     function GetUser() {

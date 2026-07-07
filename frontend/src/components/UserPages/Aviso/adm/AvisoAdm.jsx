@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Box, Button, Dialog, Paper, Typography, IconButton } from "@mui/material"
 import CloseIcon from '@mui/icons-material/Close'
 import { styled } from "@mui/material/styles"
-import { Realtimedb } from "../../../Firebase"
+import { Realtimedb } from "../../../../services/firebase"
 import { ref as dbRef, onValue, remove } from 'firebase/database'
 import AvisoForm from "./AvisoForm"
 
@@ -29,7 +29,7 @@ export default function AvisoAdm({ Adm }) {
                 setAvisos([])
             }
         })
-    }, [])
+    }, [Adm])
 
     function DeleteAviso(avisoID) {
         const deleteRef = dbRef(Realtimedb, `avisos/${Adm}/${avisoID}`)

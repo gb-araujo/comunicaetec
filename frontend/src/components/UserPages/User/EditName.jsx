@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button } from "@mui/material"
 import { DialogContent, Dialog, DialogTitle, DialogContentText, DialogActions } from "@mui/material"
 import { FormControl, TextField } from "@mui/material"
-import { Realtimedb } from '../../Firebase'
+import { Realtimedb } from '../../../services/firebase'
 import { updateProfile } from "firebase/auth"
 import { ref as dbRef, update, equalTo, query, orderByChild, onValue } from 'firebase/database'
 

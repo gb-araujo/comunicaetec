@@ -85,10 +85,6 @@ export default function DateCalendarServerRequest() {
     fetchHighlightedDays(date)
   }
 
-  function Adicionar() {
-    
-  }
-
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar

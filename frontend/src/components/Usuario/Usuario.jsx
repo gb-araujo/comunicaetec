@@ -1,55 +1,27 @@
-import { useState, useEffect } from 'react'
-import { onAuthStateChanged, signOut } from "firebase/auth"
-import { ref as dbRef, onValue, onChildChanged } from 'firebase/database'
-import { auth, Realtimedb } from '../Firebase'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../hooks/useAuth'
+import { logout } from '../../services/authService'
 import Sidebar from '../Sidebar/Sidebar'
 import { AppBar, Toolbar, Box, Button, IconButton } from "@mui/material"
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight'
 import User from "../UserPages/User/UserPage"
-import Calendario from "../UserPages/Calendario/Calendario"
 import ForumDuvidas from "../UserPages/Forum/ForumDuvidas"
 import Aviso from "../UserPages/Aviso/Aviso"
 import "./Usuario.css"
 import Solicitacoes from '../UserPages/Solicitacoes/Solicitacoes'
 
 function Usuario() {
-    const [profileImageURL, setProfileImageURL] = useState(null)
-    const [user, setUser] = useState('')
+    // Sessão e perfil vêm do AuthContext; a proteção da rota
+    // (login/verificação) é feita pelo RequireAuth no App.
+    const { user, profile } = useAuth()
     const [main, setMain] = useState('usuario')
     const [openMenu, setOpenMenu] = useState(false)
     const [rotate, setRotate] = useState('noRotate')
-    const [adm, setAdm] = useState('')
+    const navigate = useNavigate()
 
-    useEffect(() => {
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                if (!user.emailVerified) {
-                    return window.location.href = '/verificacao'
-                }
-
-                setUser(user)
-                getUser(user)
-
-            } else {
-                return window.location.href = '/registro'
-            }
-        })
-    }, [])
-
-    function getUser(user) {
-        onValue(dbRef(Realtimedb, `users/${user.uid}`), (snapshot) => {
-            if (snapshot.exists()) {
-                const User = snapshot.val()
-                setProfileImageURL(User.imageUrl)
-
-                if (User.adm) {
-                    setAdm(User.adm)
-                } else {
-                    setAdm("")
-                }
-            }
-        })
-    }
+    const profileImageURL = profile?.imageUrl ?? null
+    const adm = profile?.adm ?? ''
 
     function toggleMenu(isOpen) {
         setOpenMenu(isOpen)
@@ -63,36 +35,16 @@ function Usuario() {
             setRotate("rotate")
         }
     }
-    function changeMainToUsuario() {
-        setMain('usuario')
-        setOpenMenu(false)
-        setRotate("noRotate")
-    }
-    function changeMainToCalendario() {
-        setMain('calendario')
-        setOpenMenu(false)
-        setRotate("noRotate")
-    }
-    function changeMainToForum() {
-        setMain('forum')
-        setOpenMenu(false)
-        setRotate("noRotate")
-    }
-    function changeMainToAvisos() {
-        setMain('avisos')
-        setOpenMenu(false)
-        setRotate("noRotate")
-    }
-    function changeMainToSolicitacoes() {
-        setMain('solicitacoes')
+    function changeMain(page) {
+        setMain(page)
         setOpenMenu(false)
         setRotate("noRotate")
     }
 
     const handleSignOut = async () => {
         try {
-            await signOut(auth)
-            window.location.href = "/"
+            await logout()
+            navigate('/')
         } catch (error) {
             console.error('Erro ao sair:', error)
         }
@@ -115,11 +67,11 @@ function Usuario() {
                     OpenMenu={openMenu}
                     SetOpenMenu={toggleMenu}
                     User={user}
-                    Usuario={changeMainToUsuario}
-                    Calendario={changeMainToCalendario}
-                    Forum={changeMainToForum}
-                    Avisos={changeMainToAvisos}
-                    Solicitacoes={changeMainToSolicitacoes}
+                    Usuario={() => changeMain('usuario')}
+                    Calendario={() => changeMain('calendario')}
+                    Forum={() => changeMain('forum')}
+                    Avisos={() => changeMain('avisos')}
+                    Solicitacoes={() => changeMain('solicitacoes')}
                 />}
                 <Box className='Usuario' sx={{ width: "100%", height: "100%", padding: 8, ml: { xs: 0, md: 41 } }}>
                     {user && main == 'usuario' ? (<User User={user} ProfilePic={profileImageURL} />) : ""}

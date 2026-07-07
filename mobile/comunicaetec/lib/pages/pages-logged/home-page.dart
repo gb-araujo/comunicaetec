@@ -1,181 +1,351 @@
 import 'dart:io';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:firebase_database/firebase_database.dart';
+
+import '../../services/auth_service.dart';
+import '../../services/post_service.dart';
+import '../../services/user_service.dart';
 import '../login.page.dart';
 
+/// Fórum de dúvidas, alinhado com o frontend web: mesmos dados
+/// (`posts` filtrado por schoolID) e mesmas regras de postagem.
 class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final AuthService _authService = AuthService();
+  final UserService _userService = UserService();
+  final PostService _postService = PostService();
 
-  XFile? _selectedImage;
-  File? image;
+  PerfilUsuario? _perfil;
+  List<CursoUsuario> _cursos = [];
+  List<EscolaUsuario> _escolas = [];
+  String? _escolaSelecionada;
+  bool _carregando = true;
 
-  Future<void> pickImage() async {
-    final pickedImage = await ImagePicker().pickImage(
-        source: ImageSource.gallery);
-    if (pickedImage == null) return;
+  bool get _isAdm => (_perfil?.adm ?? '').isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDados();
+  }
+
+  Future<void> _carregarDados() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final perfil = await _userService.carregarPerfil(user.uid);
+    final cursos = await _userService.cursosAprovados(user.uid);
+    var escolas = _userService.escolasDosCursos(cursos);
+    String? escolaSelecionada = escolas.isNotEmpty ? escolas.first.id : null;
+
+    // Administrador posta na própria escola, como no fórum web
+    // (seleção travada na escola do adm).
+    final adm = perfil?.adm ?? '';
+    if (adm.isNotEmpty) {
+      final nomeEscola = await _nomeDaEscola(adm);
+      escolas = [EscolaUsuario(id: adm, nome: nomeEscola)];
+      escolaSelecionada = adm;
+    }
+
+    if (!mounted) return;
     setState(() {
-      _selectedImage = XFile(pickedImage.path);
+      _perfil = perfil;
+      _cursos = cursos;
+      _escolas = escolas;
+      _escolaSelecionada = escolaSelecionada;
+      _carregando = false;
     });
+  }
+
+  /// Nome da escola no Firestore (`escolas/{id}.nome`), como o web usa
+  /// para preencher schoolName ao postar.
+  Future<String> _nomeDaEscola(String escolaID) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('escolas')
+        .doc(escolaID)
+        .get();
+    return (doc.data()?['nome'] ?? '') as String;
+  }
+
+  Future<void> _sair() async {
+    await _authService.sair();
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-        actions: [
-          PopupMenuButton(
-            itemBuilder: (BuildContext context) {
-              return [
-                const PopupMenuItem(
-                  child: Text("Nova Postagem"),
-                  value: "nova_postagem",
-                ),
-              ];
-            },
-            onSelected: (value) {
-              if (value == "nova_postagem") {
-                _showNewPostDialog(context);
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Fórum de Dúvidas')),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
+              decoration: BoxDecoration(color: Color(0xFF656ED3)),
               child: Text(
                 'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
             ListTile(
-              title: Text('Avisos'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add navigation to notices page
-              },
-            ),
-            ListTile(
-              title: Text('Forum de Dúvidas'),
-              onTap: () {
-                Navigator.pop(context);
-                // Add navigation to forum page
-              },
-            ),
-            ListTile(
-              title: Text('Calendário'),
+              title: const Text('Calendário'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/calendario');
               },
             ),
             ListTile(
-              title: Text('Perfil'),
+              title: const Text('Perfil'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/profile');
               },
             ),
             ListTile(
-              title: Text('Sair'),
-              onTap: () async {
-                await FirebaseAuth.instance.signOut();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                );
-              },
+              title: const Text('Sair'),
+              onTap: _sair,
             ),
           ],
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _buildPostsList(),
+      floatingActionButton: _escolaSelecionada == null
+          ? null
+          : FloatingActionButton(
+              backgroundColor: const Color(0xFF656ED3),
+              onPressed: _mostrarDialogoNovoPost,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+      body: _carregando
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                if (_escolas.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: DropdownButtonFormField<String>(
+                      value: _escolaSelecionada,
+                      decoration: const InputDecoration(
+                        labelText: 'Escola',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _escolas
+                          .map((escola) => DropdownMenuItem(
+                                value: escola.id,
+                                child: Text(escola.nome),
+                              ))
+                          .toList(),
+                      // Adm fica travado na própria escola, como no web.
+                      onChanged: _isAdm
+                          ? null
+                          : (value) =>
+                              setState(() => _escolaSelecionada = value),
+                    ),
+                  ),
+                Expanded(child: _buildListaDePosts()),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildListaDePosts() {
+    final escola = _escolaSelecionada;
+    if (escola == null) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Text(
+            'Você não tem nenhum curso aprovado.\n'
+            'Cadastre um curso pelo aplicativo web para ver o fórum da sua escola.',
+            textAlign: TextAlign.center,
           ),
-        ],
+        ),
+      );
+    }
+
+    return StreamBuilder<List<Post>>(
+      stream: _postService.postsDaEscola(escola),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Erro ao carregar as postagens: ${snapshot.error}'),
+          );
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final posts = snapshot.data!;
+        if (posts.isEmpty) {
+          return const Center(child: Text('Nenhuma postagem dessa escola.'));
+        }
+
+        return ListView.builder(
+          itemCount: posts.length,
+          itemBuilder: (context, index) => _buildPost(posts[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildPost(Post post) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundImage: (post.userImage != null &&
+                          post.userImage!.isNotEmpty)
+                      ? NetworkImage(post.userImage!)
+                      : null,
+                  child: (post.userImage == null || post.userImage!.isEmpty)
+                      ? const Icon(Icons.person)
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    post.userName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (post.adm.isNotEmpty)
+                  const Icon(Icons.verified,
+                      size: 18, color: Color(0xFF656ED3)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (post.content.isNotEmpty)
+              Text(post.content, style: const TextStyle(fontSize: 16)),
+            if (post.imgURL != null && post.imgURL!.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.network(
+                  post.imgURL!,
+                  width: 250,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Chip(
+                  label: Text(post.tag, style: const TextStyle(fontSize: 12)),
+                  visualDensity: VisualDensity.compact,
+                ),
+                Text(
+                  post.dataFormatada,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Method to show the new post dialog
-  void _showNewPostDialog(BuildContext context) {
-    String title = '';
-    String content = '';
-    XFile? selectedImage;
+  void _mostrarDialogoNovoPost() {
+    final contentController = TextEditingController();
+    XFile? imagemSelecionada;
+    String cursoSelecionado = 'todos';
+
+    final cursosDaEscola = _cursos
+        .where((curso) => curso.idEscola == _escolaSelecionada)
+        .toList();
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (BuildContext context, setState) {
+          builder: (dialogContext, setDialogState) {
             return AlertDialog(
               title: const Text('Nova Postagem'),
               content: SingleChildScrollView(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextField(
-                      decoration: const InputDecoration(labelText: 'Título'),
-                      onChanged: (value) {
-                        title = value;
-                      },
+                      controller: contentController,
+                      decoration:
+                          const InputDecoration(labelText: 'Escreva aqui'),
+                      maxLines: 5,
+                      minLines: 1,
                     ),
-                    TextField(
-                      decoration: const InputDecoration(labelText: 'Conteúdo'),
-                      onChanged: (value) {
-                        content = value;
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton(
+                    const SizedBox(height: 16),
+                    // Curso define a tag do post ("nome-periodo" ou "todos"),
+                    // igual ao fórum web. Adm posta sempre para todos.
+                    if (!_isAdm && cursosDaEscola.isNotEmpty)
+                      DropdownButtonFormField<String>(
+                        value: cursoSelecionado,
+                        decoration: const InputDecoration(labelText: 'Curso'),
+                        items: [
+                          const DropdownMenuItem(
+                            value: 'todos',
+                            child: Text('todos'),
+                          ),
+                          ...cursosDaEscola.map((curso) => DropdownMenuItem(
+                                value: curso.id,
+                                child: Text(curso.tag),
+                              )),
+                        ],
+                        onChanged: (value) => setDialogState(
+                            () => cursoSelecionado = value ?? 'todos'),
+                      ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.add_a_photo),
+                      label: Text(imagemSelecionada == null
+                          ? 'Adicionar imagem (opcional)'
+                          : 'Imagem selecionada'),
                       onPressed: () async {
-                        XFile? image = await ImagePicker().pickImage(
-                          source: ImageSource.gallery,
-                        );
-                        if (image != null) {
-                          setState(() {
-                            selectedImage = image;
-                          });
+                        final imagem = await ImagePicker()
+                            .pickImage(source: ImageSource.gallery);
+                        if (imagem != null) {
+                          setDialogState(() => imagemSelecionada = imagem);
                         }
                       },
-                      child: const Text('Selecionar Imagem'),
                     ),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(dialogContext).pop(),
                   child: const Text('Cancelar'),
                 ),
                 ElevatedButton(
-                  onPressed: selectedImage != null
-                      ? () {
-                    Navigator.of(context).pop();
-                    _addNewPost(title, content, selectedImage);
-                  }
-                      : null,
-                  // Disable the button if no image is selected
+                  onPressed: () async {
+                    Navigator.of(dialogContext).pop();
+                    await _publicarPost(
+                      content: contentController.text.trim(),
+                      imagem: imagemSelecionada,
+                      cursoID: cursoSelecionado,
+                      cursosDaEscola: cursosDaEscola,
+                    );
+                  },
                   child: const Text('Postar'),
                 ),
               ],
@@ -186,188 +356,48 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _addNewPost(String title, String content,
-      XFile? imageFile) async {
+  Future<void> _publicarPost({
+    required String content,
+    XFile? imagem,
+    required String cursoID,
+    required List<CursoUsuario> cursosDaEscola,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final escolaID = _escolaSelecionada;
+    if (user == null || escolaID == null) return;
+
+    // Mesma regra do web: precisa de conteúdo ou imagem.
+    if (content.isEmpty && imagem == null) {
+      _mostrarMensagem('Escreva algo ou selecione uma imagem.');
+      return;
+    }
+
+    String tag = 'todos';
+    if (cursoID != 'todos') {
+      final curso = cursosDaEscola.where((c) => c.id == cursoID).toList();
+      if (curso.isNotEmpty) tag = curso.first.tag;
+    }
+
     try {
-      String imagePath = '';
-      if (imageFile != null) {
-        firebase_storage.Reference ref = firebase_storage.FirebaseStorage
-            .instance
-            .ref()
-            .child('post_images')
-            .child('${DateTime
-            .now()
-            .millisecondsSinceEpoch}');
-        await ref.putFile(File(imageFile.path));
-        imagePath = await ref.getDownloadURL();
-      }
-
-      DatabaseReference newPostRef = FirebaseDatabase.instance.ref().child(
-          'posts').push();
-      newPostRef.set({
-        'title': title,
-        'content': content,
-        'imagePath': imagePath,
-      });
+      await _postService.criarPost(
+        content: content,
+        imagem: imagem != null ? File(imagem.path) : null,
+        schoolID: escolaID,
+        schoolName: await _nomeDaEscola(escolaID),
+        tag: tag,
+        userID: user.uid,
+        userName: _perfil?.displayName ?? user.displayName ?? '',
+        userImage: _perfil?.imageUrl,
+        adm: _perfil?.adm ?? '',
+      );
+      _mostrarMensagem('Postagem publicada!');
     } catch (error) {
-      print('Erro ao adicionar nova postagem: $error');
+      _mostrarMensagem('Erro ao publicar: $error');
     }
   }
 
-  // Widget to build the list of posts
-  Widget _buildPostsList() {
-    return StreamBuilder<DataSnapshot>(
-      stream: FirebaseDatabase.instance
-          .ref()
-          .child('posts')
-          .onValue
-          .map((event) => event.snapshot),
-      builder: (BuildContext context, AsyncSnapshot<DataSnapshot> snapshot) {
-        if (snapshot.hasData && snapshot.data!.value != null) {
-          DataSnapshot data = snapshot.data!;
-          // Cast data.value to Map<dynamic, dynamic> assuming it's a map
-          Map<dynamic, dynamic> posts = data.value as Map<dynamic, dynamic>;
-
-          if (posts.isEmpty) {
-            return const Center(
-              child: Text('Nenhuma postagem disponível.'),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: posts.length,
-            itemBuilder: (BuildContext context, int index) {
-              String postId = posts.keys.elementAt(index);
-              Map<dynamic, dynamic> postData = posts.values.elementAt(index);
-
-              // Passando todos os argumentos necessários para _buildPost
-              return _buildPost(
-                postData['title'],
-                postData['content'],
-                postData['imagePath'],
-                postId,
-                postData['likes'] ??
-                    0, // Se o campo likes não estiver presente, use 0 como valor padrão
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Text('Erro ao carregar as postagens: ${snapshot.error}'),
-          );
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-      },
-    );
+  void _mostrarMensagem(String texto) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texto)));
   }
-
-  // construir um item de postagem
-
-  Widget _buildPost(String title, String content, String? imagePath, String postId, int likes) {
-    bool isLiked = false; // Tracks the like status for the current user
-    bool isProcessing = false; // Tracks if the like operation is in progress
-
-    // Get the current user reference
-    final currentUser = FirebaseAuth.instance.currentUser;
-
-    // Check if the current user has already liked the post
-    Future<void> checkLikedByCurrentUser() async {
-      if (currentUser != null) {
-        DatabaseReference likedByRef = FirebaseDatabase.instance.ref().child('posts').child(postId).child('likedBy').child(currentUser.uid);
-        DataSnapshot snapshot = await likedByRef.once().then((event) => event.snapshot);
-        isLiked = snapshot.value != null; // Update isLiked based on the current user's like status
-      }
-    }
-
-    return FutureBuilder<void>(
-      future: checkLikedByCurrentUser(),
-      builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-        return Card(
-          margin: EdgeInsets.all(8.0),
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  content,
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 8),
-                if (imagePath != null && imagePath.isNotEmpty)
-                  Container(
-                    width: 250, // Definindo a largura desejada para a imagem
-                    height: 250, // Definindo a altura desejada para a imagem
-                    child: Image.network(
-                      imagePath,
-                      fit: BoxFit.cover, // Ajustando a imagem para cobrir todo o espaço disponível
-                    ),
-                  ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: Icon(isLiked ? Icons.thumb_up : Icons.thumb_up_outlined), // Change the icon based on like status
-                      color: isLiked ? Colors.blue : Colors.grey,
-                      onPressed: isProcessing
-                          ? null
-                          : () async {
-                        try {
-                          setState(() {
-                            isProcessing = true; // Set processing flag
-                          });
-
-                          DatabaseReference postRef = FirebaseDatabase.instance.ref().child('posts').child(postId);
-                          if (isLiked) {
-                            // Remove the like
-                            await postRef.update({'likes': likes - 1});
-                            if (currentUser != null) {
-                              postRef.child('likedBy').child(currentUser.uid).remove();
-                            }
-                          } else {
-                            // Like the post
-                            await postRef.update({'likes': likes + 1});
-                            if (currentUser != null) {
-                              postRef.child('likedBy').child(currentUser.uid).set(true);
-                            }
-                          }
-
-                          // Update local state
-                          setState(() {
-                            isLiked = !isLiked; // Toggle like status
-                            likes = isLiked ? likes + 1 : likes - 1; // Update like count
-                          });
-                        } catch (error) {
-                          print('Erro ao atualizar as curtidas: $error');
-                        } finally {
-                          setState(() {
-                            isProcessing = false; // Reset processing flag
-                          });
-                        }
-                      },
-                    ),
-                    SizedBox(width: 8),
-                    Text(likes.toString()), // Display like count
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
 }
