@@ -42,11 +42,16 @@ comunicaetec/
 
 ```bash
 cd frontend
+cp .env.example .env   # preencha com os valores do console do Firebase
 npm install
 npm run dev
 ```
 
 O Vite exibira a URL local, geralmente `http://localhost:5173`.
+
+As credenciais do Firebase sao lidas de variaveis de ambiente (`VITE_FIREBASE_*`)
+definidas no arquivo `frontend/.env`, que nao e versionado. Os valores estao em
+Console do Firebase > Configuracoes do projeto > Seus apps.
 
 ## Rodando o mobile
 
@@ -65,6 +70,19 @@ flutter build apk
 ## Configuracao do Firebase
 
 Revise os arquivos de configuracao Firebase do frontend e do app mobile antes de rodar em outro ambiente. O projeto usa autenticacao e servicos de banco/armazenamento do Firebase, entao as regras de acesso devem ser configuradas no console do Firebase conforme o ambiente.
+
+### Regras de seguranca do Realtime Database
+
+O arquivo `frontend/database.rules.json` versiona um ponto de partida para as
+regras do Realtime Database (acesso negado por padrao; `users` gravavel pelo
+dono; `avisos` gravaveis apenas pelo administrador da escola; indices para as
+queries usadas pelo app).
+
+**Atencao:** essas regras sao uma base e NAO sao aplicadas automaticamente.
+Antes de publicar, teste no simulador do console do Firebase (Realtime
+Database > Regras) com os fluxos reais do app, ajuste o que for necessario e
+so entao publique. Regras erradas podem tanto expor dados quanto quebrar o
+aplicativo em producao.
 
 ## Rotas principais do frontend
 
@@ -86,7 +104,6 @@ Revise os arquivos de configuracao Firebase do frontend e do app mobile antes de
 
 ## Proximos passos sugeridos
 
-- Documentar variaveis/configuracoes de ambiente.
 - Adicionar imagens das telas principais.
-- Criar guia de regras do Firebase para desenvolvimento.
 - Adicionar testes basicos para fluxos de autenticacao e navegacao.
+- Publicar as regras do Realtime Database apos validacao no simulador.
