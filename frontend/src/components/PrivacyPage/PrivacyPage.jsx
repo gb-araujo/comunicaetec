@@ -1,4 +1,3 @@
-import React from 'react';
 import './PrivacyPage.css';
 
 const PrivacyPage = () => {
@@ -78,7 +77,7 @@ const PrivacyPage = () => {
         Podemos fornecer acesso a ferramentas de terceiros sobre as quais não monitoramos nem temos controle ou entrada.
       </p>
       <p>
-        Você reconhece e concorda que fornecemos acesso a tais ferramentas "como elas são" e "conforme disponíveis" sem garantias, representações ou condições de qualquer tipo e sem qualquer endosso. Não teremos qualquer responsabilidade decorrente ou relacionada com o uso de ferramentas opcionais de terceiros.
+        Você reconhece e concorda que fornecemos acesso a tais ferramentas &quot;como elas são&quot; e &quot;conforme disponíveis&quot; sem garantias, representações ou condições de qualquer tipo e sem qualquer endosso. Não teremos qualquer responsabilidade decorrente ou relacionada com o uso de ferramentas opcionais de terceiros.
       </p>
       
       {/* Seção 8 - Links de Terceiros */}

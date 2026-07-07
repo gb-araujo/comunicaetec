@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
-import { Realtimedb } from "../../Firebase"
+import { Realtimedb } from "../../../services/firebase"
 import { ref as dbRef, update as dbUpdate, onValue, get, child, equalTo, query, orderByChild } from "firebase/database"
 import { List, ListItem, ListItemText, Paper, Divider, Button, Avatar } from "@mui/material"
 import TabsComponenet from "./Tabs"
 
-export default function Solicitacoes({ Adm, User }) {
+export default function Solicitacoes({ Adm }) {
     const [solicitacoes, setSolicitacoes] = useState([])
     const [value, setValue] = useState(0)
 
@@ -28,16 +28,13 @@ export default function Solicitacoes({ Adm, User }) {
                 setSolicitacoes([])
             }
         })
-    }, [])
+    }, [Adm])
 
     async function OnAccept(solicitacao) {
         let Exists = true
         await get(child(dbRef(Realtimedb), `users/${solicitacao.userID}/curso/${solicitacao.courseID}`))
             .then((snapshot) => {
-                if (snapshot.exists()) {
-                } else {
-                    Exists = false
-                }
+                Exists = snapshot.exists()
             }).catch((error) => { console.error(error) })
         if (!Exists) { return }
 
@@ -54,10 +51,7 @@ export default function Solicitacoes({ Adm, User }) {
         let Exists = true
         await get(child(dbRef(Realtimedb), `users/${solicitacao.userID}/curso/${solicitacao.courseID}`))
             .then((snapshot) => {
-                if (snapshot.exists()) {
-                } else {
-                    Exists = false
-                }
+                Exists = snapshot.exists()
             }).catch((error) => { console.error(error) })
         if (!Exists) { return }
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import defaultProfileImage from '../../../assets/fotoPadrao.png'
 import { Avatar, Badge, Box, Typography, IconButton, Button, Divider } from "@mui/material"
 import { List, ListItem, ListItemText } from "@mui/material"
 import { Dialog } from "@mui/material"
@@ -7,7 +6,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import AddIcon from '@mui/icons-material/Add'
 import CursoForm from './CursoForm'
 import { styled } from '@mui/material/styles'
-import { auth, storage, Realtimedb } from '../../Firebase'
+import { auth, storage, Realtimedb } from '../../../services/firebase'
 import { updateProfile } from 'firebase/auth'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { ref as dbRef, update as dbUpdate, remove, onValue } from 'firebase/database'
@@ -59,7 +58,7 @@ export default function User({ User, ProfilePic }) {
                 setCursosCad([])
             }
         })
-    }, [])
+    }, [User.uid])
 
     const handleFileChange = (e) => {
         const imageFile = e.target.files[0]

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import { Paper, Dialog, DialogTitle, DialogContent, Divider, DialogActions, Avatar, Box, Typography, IconButton } from "@mui/material"
-import { FormControl, InputLabel, Select, MenuItem, Fab, Button, TextField } from "@mui/material"
+import { Dialog, DialogTitle, DialogContent, Divider, DialogActions, Avatar, Box, Typography, IconButton } from "@mui/material"
+import { Button, TextField } from "@mui/material"
 import { styled } from "@mui/material/styles"
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
 import VerifiedIcon from '@mui/icons-material/Verified'
-import { storage, Realtimedb } from "../../Firebase"
+import { storage, Realtimedb } from "../../../services/firebase"
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { ref as dbRef, push, query, orderByChild, equalTo, onValue, remove } from 'firebase/database'
 
@@ -50,7 +50,7 @@ export default function Respostas({ ReplyOpen, SetReplyOpen, PostInfo, User, Adm
             reader.readAsDataURL(event.target.files[0])
         }
     }
-    function OnImageClose() {
+    function OnPreviewImageRemove() {
         setSelectedImage(null)
         setPreviewImage(null)
     }
@@ -155,7 +155,7 @@ export default function Respostas({ ReplyOpen, SetReplyOpen, PostInfo, User, Adm
                         multiline maxRows={10} placeholder='escreva aqui' />
                     {previewImage && (
                         <Box>
-                            <IconButton sx={{ position: "absolute", left: "20px" }} onClick={OnImageClose}>
+                            <IconButton sx={{ position: "absolute", left: "20px" }} onClick={OnPreviewImageRemove}>
                                 <CloseIcon color="error" />
                             </IconButton>
                             <PostImage src={previewImage} alt="Imagem do Post" />

@@ -4,7 +4,7 @@ import { TextField, Button, IconButton, Box } from "@mui/material"
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto'
 import CloseIcon from '@mui/icons-material/Close'
 import { styled } from "@mui/material/styles"
-import { storage, Realtimedb } from "../../../Firebase"
+import { storage, Realtimedb } from "../../../../services/firebase"
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { ref as dbRef, push } from 'firebase/database'
 

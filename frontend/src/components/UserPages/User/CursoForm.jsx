@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Button, Box } from "@mui/material"
 import { DialogContent, Dialog, DialogTitle, DialogContentText, DialogActions } from "@mui/material"
 import { FormControl, InputLabel, Select, MenuItem } from "@mui/material"
-import { Realtimedb, Firestoredb } from '../../Firebase'
+import { Realtimedb, Firestoredb } from '../../../services/firebase'
 import { collection, query, getDocs, where } from "firebase/firestore"
 import { ref as dbRef, set, get, child } from 'firebase/database'
 

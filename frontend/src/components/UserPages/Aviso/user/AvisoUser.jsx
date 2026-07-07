@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import { Box, Button, Dialog, Paper, Typography } from "@mui/material"
+import { Box, Dialog, Paper, Typography } from "@mui/material"
 import { Select, MenuItem, InputLabel, FormControl } from "@mui/material"
 import { styled } from "@mui/material/styles"
-import { Realtimedb } from "../../../Firebase"
+import { Realtimedb } from "../../../../services/firebase"
 import { ref as dbRef, onValue, query, orderByChild } from 'firebase/database'
 
 const PostImage = styled('img')({ borderRadius: "5px"})
@@ -37,7 +37,7 @@ export default function AvisoUser({ User }) {
         }, {
             onlyOnce: true
         })
-    }, [])
+    }, [User.uid])
 
     function OnSelectChange(e) {
         setSelect(e.target.value)

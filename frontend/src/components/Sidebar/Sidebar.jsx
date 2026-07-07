@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import defaultProfileImage from '../../assets/fotoPadrao.png'
 import './Sidebar.css'
 import { Link } from 'react-router-dom'
@@ -7,7 +7,6 @@ import { styled } from '@mui/material/styles'
 import calendario from '../../assets/calendario.png'
 import forum from '../../assets/forum.png'
 import avisos from '../../assets/avisos.png'
-import chat from '../../assets/chat.png'
 import solicitacao from '../../assets/solicitacao.png'
 
 const StyledDrawer = styled(Drawer)({
@@ -31,7 +30,7 @@ function Sidebar({ User, Forum, Usuario, Calendario, Avisos, Solicitacoes, OpenM
         } else {
             setProfileImageURL(defaultProfileImage)
         }
-    }, [])
+    }, [User.photoURL])
 
     return (
         <>
