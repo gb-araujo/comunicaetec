@@ -67,6 +67,22 @@ Para gerar APK:
 flutter build apk
 ```
 
+## Modelo de dados compartilhado
+
+Web e mobile usam o mesmo esquema no Firebase:
+
+| Caminho | Conteudo |
+| --- | --- |
+| `users/{uid}` | `displayName`, `email`, `imageUrl` (URL de download), `adm`, `curso/{cursoID}` |
+| `users/{uid}/curso/{cursoID}` | `idEscola`, `schoolName`, `name`, `periodo`, `status` |
+| `posts` | `content`, `imgURL`, `schoolID`, `schoolName`, `tag`, `userID`, `userName`, `userImage`, `adm`, `createdAt` |
+| `avisos/{escolaID}` | avisos da escola, ordenados por `createdAt` |
+| `solicitacoes/{uid}-{cursoID}` | solicitacoes de matricula por escola |
+
+Imagens no Storage: perfil em `images/profile_image_{uid}.jpg` e posts em
+`post_image/image_{timestamp}.jpg`. Qualquer mudanca de esquema deve ser
+aplicada nas duas plataformas.
+
 ## Configuracao do Firebase
 
 Revise os arquivos de configuracao Firebase do frontend e do app mobile antes de rodar em outro ambiente. O projeto usa autenticacao e servicos de banco/armazenamento do Firebase, entao as regras de acesso devem ser configuradas no console do Firebase conforme o ambiente.

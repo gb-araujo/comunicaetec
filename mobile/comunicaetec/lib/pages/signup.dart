@@ -2,8 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'package:firebase_database/firebase_database.dart';
+import '../services/auth_service.dart';
 import 'email-confirmation.dart';
 
 class Signup extends StatefulWidget {
@@ -18,32 +17,8 @@ class _SignupState extends State<Signup> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final AuthService _authService = AuthService();
   String? _errorMessage;
-
-  Future<void> _saveUserDataToDatabase(UserCredential userCredential, File? image) async {
-    final FirebaseDatabase database = FirebaseDatabase.instance;
-    final String userId = userCredential.user!.uid;
-
-    // Crie um mapa com os dados do usuário
-    Map<String, dynamic> userData = {
-      'name': _nameController.text,
-      'email': _emailController.text,
-      // Adicione outros campos do usuário, se necessário
-    };
-
-    // Se a imagem foi carregada, adicione a URL da imagem aos dados do usuário
-    if (image != null) {
-
-      final String fileName = 'profile_image_$userId.jpg';
-      final String imageUrl = 'gs://comunicaetec-731e5.appspot.com/images/$fileName'; // Substitua pelo URL correto do seu Storage
-      userData['imageUrl'] = imageUrl;
-    }
-
-    // Salve os dados do usuário no Realtime Database
-    await database.ref().child('users').child(userId).set(userData);
-
-  }
 
   Future<void> pickImage() async {
     final pickedImage = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -53,36 +28,16 @@ class _SignupState extends State<Signup> {
     });
   }
 
-  Future<void> _uploadImage(File image, String userId) async {
-    final String fileName = 'profile_image_$userId.jpg'; // Nome do arquivo no Storage
-    final firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance.ref().child('images').child(fileName);
-
-    // Faz o upload da imagem para o Firebase Storage
-    await ref.putFile(image);
-
-    // Obtenha a URL da imagem carregada
-    final String imageUrl = await ref.getDownloadURL();
-
-
-  }
-
   Future<void> register(BuildContext context) async {
     try {
-      final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+      // Cria a conta e grava users/{uid} no mesmo formato do web
+      // (displayName, email e imageUrl com a URL de download real).
+      await _authService.registrar(
+        nome: _nameController.text,
         email: _emailController.text,
-        password: _passwordController.text,
+        senha: _passwordController.text,
+        imagem: image,
       );
-
-      // Upload da imagem para o Firebase Storage
-      if (image != null) {
-        final String userId = userCredential.user!.uid; // ID do usuário recém-criado
-        await _uploadImage(image!, userId);
-      }
-
-      // Salve os dados do usuário no Realtime Database
-      await _saveUserDataToDatabase(userCredential, image);
-
-      print("Usuário registrado com sucesso!");
 
       // Navega para a página de verificação
       Navigator.pushReplacement(
@@ -91,12 +46,15 @@ class _SignupState extends State<Signup> {
       );
 
     } catch (e) {
-      print(e);
       String errorMessage = 'Ocorreu um erro ao registrar.';
 
       if (e is FirebaseAuthException) {
         if (e.code == 'email-already-in-use') {
           errorMessage = 'O endereço de e-mail já está sendo usado por outra conta.';
+        } else if (e.code == 'weak-password') {
+          errorMessage = 'A senha deve ter pelo menos 6 caracteres.';
+        } else if (e.code == 'invalid-email') {
+          errorMessage = 'O e-mail informado é inválido.';
         } else {
           errorMessage = 'Erro desconhecido: ${e.message}';
         }

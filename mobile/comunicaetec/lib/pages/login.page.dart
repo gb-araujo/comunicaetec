@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import '../services/auth_service.dart';
 import 'reset-password.page.dart';
 import 'pages-logged/home-page.dart'; // Importe a página HomePage
 import 'signup.dart';
@@ -12,6 +12,7 @@ class LoginPage extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -228,33 +229,15 @@ class LoginPage extends StatelessWidget {
 
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
-      // Initialize GoogleSignIn
-      final GoogleSignIn googleSignIn = GoogleSignIn();
+      // O serviço também sincroniza users/{uid} no Realtime Database,
+      // como o frontend web faz no login com Google.
+      final user = await _authService.entrarComGoogle();
 
-      // Sign in
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
-
-      // Check if user cancelled the sign-in process
-      if (googleSignInAccount == null) return;
-
-      // Obtain the authentication details
-      final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
-
-      // Create a new credential
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      // Sign in to Firebase with the credential
-      final UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-
-      // Check if user is signed in
-      if (userCredential.user != null) {
-        // Navigate to the HomePage
+      // null = usuário cancelou o fluxo do Google
+      if (user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(builder: (context) => const HomePage()),
         );
       }
     } catch (e) {
